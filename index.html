@@ -1,25 +1,128 @@
-​<!DOCTYPE html>
+```html
+<!DOCTYPE html>
 <html lang="hu">
 <head>
-<meta charset="UTF-8">
-<title>Vue Prototípus</title>
-<script src="[https://unpkg.com/vue@3/dist/vue.global.js](https://unpkg.com/vue@3/dist/vue.global.js)"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue Prototípus</title>
+    
+    <!-- Tailwind CSS (A szép dizájnhoz) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vue 3 (A logikához) -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <style>
+        /* A v-cloak elrejti a "bajuszokat" amíg a Vue be nem tölt */
+        [v-cloak] {
+            display: none !important;
+        }
+        
+        /* Egy kis animáció a betöltéshez */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
-<body>
-<div id="app">
-<h2>{{ uzenet }}</h2>
-<button @click="szamlalo++">Kattintások: {{ szamlalo }}</button>
-</div>
-<script>
-const { createApp } = Vue;
-createApp({
-data() {
-return {
-uzenet: 'Helló GitHub Pages!',
-szamlalo: 0
-}
-}
-}).mount('#app');
-</script>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex items-center justify-center p-4">
+
+    <!-- Az app konténere, a v-cloak megakadályozza a villogást -->
+    <div id="app" v-cloak class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md fade-in">
+        
+        <header class="mb-6 text-center">
+            <h1 class="text-3xl font-extrabold text-indigo-600 mb-2">✨ Vue Mini App</h1>
+            <p class="text-sm text-slate-500">Egyszerű prototípus buildelés nélkül</p>
+        </header>
+
+        <!-- Bemeneti mező -->
+        <div class="mb-6">
+            <div class="flex gap-2">
+                <input 
+                    v-model="ujFeladat" 
+                    @keyup.enter="hozzaad" 
+                    type="text" 
+                    placeholder="Mit szeretnél ma csinálni?" 
+                    class="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm"
+                >
+                <button 
+                    @click="hozzaad" 
+                    class="bg-indigo-600 text-white font-semibold px-5 py-3 rounded-xl hover:bg-indigo-700 transition shadow-md active:scale-95"
+                >
+                    Hozzáad
+                </button>
+            </div>
+        </div>
+
+        <!-- Lista -->
+        <ul class="space-y-3">
+            <li 
+                v-for="(feladat, index) in feladatok" 
+                :key="index" 
+                class="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-200 transition hover:border-indigo-300 hover:shadow-sm group"
+            >
+                <div class="flex items-center gap-3 cursor-pointer select-none flex-1" @click="feladat.kesz = !feladat.kesz">
+                    <!-- Pipáló gomb -->
+                    <div :class="feladat.kesz ? 'bg-indigo-500 border-indigo-500' : 'border-slate-300'" class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition">
+                        <svg v-if="feladat.kesz" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <!-- Szöveg -->
+                    <span :class="{'line-through text-slate-400': feladat.kesz}" class="font-medium text-slate-700 transition">
+                        {{ feladat.szoveg }}
+                    </span>
+                </div>
+                
+                <!-- Törlés gomb -->
+                <button @click="torol(index)" class="text-slate-400 hover:text-red-500 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition focus:opacity-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            </li>
+        </ul>
+
+        <!-- Üres állapot -->
+        <div v-if="feladatok.length === 0" class="text-center text-slate-500 mt-6 p-4 border-2 border-dashed border-slate-200 rounded-xl">
+            Nincs még feladat. Kezdj el gépelni felül!
+        </div>
+
+    </div>
+
+    <!-- Vue App Logika -->
+    <script>
+        const { createApp, ref } = Vue;
+
+        createApp({
+            setup() {
+                // Állapot (State)
+                const ujFeladat = ref('');
+                const feladatok = ref([
+                    { szoveg: 'A v-cloak elrejti a bajuszokat', kesz: true },
+                    { szoveg: 'Készíteni egy szuper Vue prototípust', kesz: false }
+                ]);
+
+                // Metódusok
+                const hozzaad = () => {
+                    if (ujFeladat.value.trim() !== '') {
+                        feladatok.value.push({ szoveg: ujFeladat.value, kesz: false });
+                        ujFeladat.value = ''; // Mező kiürítése
+                    }
+                };
+
+                const torol = (index) => {
+                    feladatok.value.splice(index, 1);
+                };
+
+                // A Vue számára elérhetővé tesszük a változókat és függvényeket
+                return {
+                    ujFeladat,
+                    feladatok,
+                    hozzaad,
+                    torol
+                }
+            }
+        }).mount('#app');
+    </script>
 </body>
 </html>
