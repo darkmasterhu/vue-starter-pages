@@ -1,0 +1,25 @@
+​<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>Vue Prototípus</title>
+<script src="[https://unpkg.com/vue@3/dist/vue.global.js](https://unpkg.com/vue@3/dist/vue.global.js)"></script>
+</head>
+<body>
+<div id="app">
+<h2>{{ uzenet }}</h2>
+<button @click="szamlalo++">Kattintások: {{ szamlalo }}</button>
+</div>
+<script>
+const { createApp } = Vue;
+createApp({
+data() {
+return {
+uzenet: 'Helló GitHub Pages!',
+szamlalo: 0
+}
+}
+}).mount('#app');
+</script>
+</body>
+</html>
